@@ -1,0 +1,82 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<title>Sign up</title>
+
+
+{% block body %}
+        
+      
+        <!-- Register Form -->
+<section>
+    <form method="POST" action="{% url 'user:confirm_register' %}" class="contact-form" name="form_insert">
+        {% csrf_token %}
+            <h6  style="font-size: 35px;"><b>SIGN UP</b></h6>
+
+        <br>
+        <!-- username-->
+            <h6 class="mb-0 text-sm">Username</h6>
+            <input class="mb-4" type="text" name="username" placeholder="Enter username" required/>
+                {% if fail_username %}
+                <label class="mb-1" style="color: tomato; margin-top: -1em;">
+                    <b>{{fail_username}}</b><br>
+                </label>  
+                {% endif %} 
+        
+        <br>
+        <!-- password-->
+            <h6 class="mb-0 text-sm">Password</h6>
+            <input class="mb-4" type="password" name="password" placeholder="Enter password" required/>
+                {% if fail_password %}
+                <label class="mb-1" style="color: tomato; margin-top: -1em;">
+                    <b>{{fail_password}}</b><br> 
+                </label> 
+                {% endif %}
+
+        <!-- <div style="font-size: 0.8em;">
+            <li>Password must have at least 8 characters</li>
+            <li>Password must have at least 1 of a-z</li>
+            <li>Password must have at least 1 of A-Z</li>
+            <li>Password must have at least 1 of 0-9</li>
+        </div>  -->
+
+        <br>
+        <!-- re password-->
+            <h6 class="mb-0 text-sm">Confirm Password</h6>
+            <input type="password" name="re_password" placeholder="Confirm password" required/>
+                {% if fail_re_password %}
+                <label class="mb-1" style="color: tomato; margin-top: 0em;">
+                    <b>{{fail_re_password}}</b><br>
+                </label>  
+                {% endif %}
+
+        <br>
+        <!-- Name -->
+            <h6 class="mb-0 text-sm">First Name</h6>
+            <input type="text" name="first_name" placeholder="Enter your first name" required/>
+
+
+            <h6 class="mb-0 text-sm">Last Name</h6>
+            <input type="text" name="last_name" placeholder="Enter your last name" required/>
+        
+        <br>
+        <!-- Email-->
+            <h6 class="mb-0 text-sm">Email Address</h6>
+            <input  type="email" name="email" placeholder="Enter a valid email address" required/>
+            {% if fail_email %}
+                <label class="mb-1" style="color: tomato; margin-top: -1em;">
+                    <b>{{fail_email}}</b><br>
+                </label>  
+            {% endif %} 
+
+        <br><br><br><br>
+        <button type="submit" class="btn btn-blue text-center">Confirm</button>
+        <small class="font-weight-bold">Aleready have an account ? <a href="{% url 'user:login' %}" style="color: #aa98e7;">Login</a></small>
+                       
+    </form>
+</section>
+
+
+</html>
+{% endblock %}
