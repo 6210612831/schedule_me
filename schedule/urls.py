@@ -21,6 +21,9 @@ urlpatterns = [
     path("search_todolist", views.search_todolist, name="search_todolist"),
     path("delete_todolist/<str:td_id>",
          views.delete_todolist, name="delete_todolist"),
-    #path("dormitories", views.dormitories, name="dormitories"),
-    #path("<str:dorm_title>", views.dormitory, name="dormitory"),
+    path("insert_todolist_schdule", views.insert_todolist_schdule,
+         name="insert_todolist_schdule"),
+    path("index_day_todolist/<str:day>",
+         views.index_day_todolist, name="index_day_todolist"),
+
 ]

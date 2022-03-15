@@ -536,3 +536,88 @@ def search_todolist(request):
 def delete_todolist(request, td_id):
     Todolist.objects.get(td_id=td_id, user=request.user).delete()
     return render(request, "schedule/index.html")
+
+
+# INSERT TODOLIST
+def insert_todolist_schdule(request):
+    pass
+    # if not request.user.is_authenticated:
+    #     messages.warning(request, "Login First to proceed")
+    #     return HttpResponseRedirect(reverse("schedule:index"))
+
+    # if request.method == "POST":
+    #     day = request.POST["day"]
+    #     td_thing = request.POST["td_thing"]
+    #     start_hr = request.POST["start_hr"]
+    #     start_min = request.POST["start_min"]
+    #     end_hr = request.POST["end_hr"]
+    #     end_min = request.POST["end_min"]
+    #     task_id = request.POST["task_id"]
+
+    #     start_time = start_hr+":"+start_min
+    #     end_time = end_hr + ":" + end_min
+    #     task = Task.objects.get(task_id=task_id)
+    #     new_todolist = Todolist.objects.create(td_thing=td_thing, td_start=start_time, td_end=end_time,
+    #                                            task=task, user=request.user)
+    #     new_todolist.save()
+    #     new_day = Day.objects.get(day_code=day, user=request.user)
+    #     new_day.todolist_id.add(new_todolist)
+    #     new_day.save()
+    #     return HttpResponseRedirect(reverse("schedule:index"))
+    # else:
+    #     return HttpResponseRedirect(reverse("schedule:index"))
+
+
+def index_day_todolist(request, day):
+    temp = []
+    data = Day.objects.get(user=request.user, day_code=day)
+
+    # Get schedule table data
+    schedule_data = schedule_table(request)
+
+    for x in data.todolist_id.all():
+        temp.append(x.td_start)
+        temp.append(x.td_end)
+
+    if len(temp) != 0:
+        # clean data time_stamp
+        i = 0
+        time_stamp = []
+        while i < len(temp):
+            time_stamp.append([((temp[i].hour * 60) + temp[i].minute),
+                               ((temp[i+1].hour * 60) + temp[i+1].minute)])
+            i += 2
+        time_stamp.sort()
+    else:
+        time_stamp = [[0, 0]]
+        # find free time
+    free_time = []
+    i = 0
+    if (time_stamp[0][0] != 0):
+        free_time.append([0, time_stamp[0][0]-1])
+    if (time_stamp[-1][1] != 1439):
+        free_time.append([time_stamp[-1][1]+1, 1439])
+    while i < len(time_stamp)-1:
+        free_time.append([time_stamp[i][1]+1, time_stamp[i+1][0]-1])
+        i += 1
+    free_time.sort()
+    # free_time = [[0,0],[1,1]]
+    can_insert_todolist = []
+
+    for x in Todolist.objects.filter(user=request.user):
+        for y in free_time:
+            if (x.td_start.hour * 60)+(x.td_start.minute) >= y[0] and (x.td_end.hour * 60)+(x.td_end.minute) <= y[1]:
+                if len(can_insert_todolist) != 0:
+                    if [x.td_id, x.td_thing] != can_insert_todolist[-1]:
+                        can_insert_todolist.append([x.td_id, x.td_thing])
+                else:
+                    can_insert_todolist.append([x.td_id, x.td_thing])
+
+    can_insert_todolist.sort()
+    #can_insert_todolists = list(OrderedDict.fromkeys(can_insert_todolist))
+
+    return render(request, "schedule/index.html", {
+        "can_insert_todolists": can_insert_todolist,
+        "day_insert_todolist": day,
+        "schedule_data": schedule_data,
+    })
