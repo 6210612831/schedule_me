@@ -5,8 +5,10 @@ from . import views
 app_name = 'schedule'
 urlpatterns = [
     path("", views.index, name="index"),
+    path("index2", views.index2, name="index2"),
     path("index_day/<str:day>",
          views.index_day, name="index_day"),
+
     path("index_start_hr/<str:day>/<str:start_hr>",
          views.index_start_hr, name="index_start_hr"),
     path("index_start_min/<str:day>/<str:start_hr>/<str:start_min>",
@@ -25,5 +27,7 @@ urlpatterns = [
          name="insert_todolist_schdule"),
     path("index_day_todolist/<str:day>",
          views.index_day_todolist, name="index_day_todolist"),
+
+    path("test", views.test, name="test"),
 
 ]

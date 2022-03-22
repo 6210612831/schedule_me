@@ -19,6 +19,11 @@ def index(request):
     return render(request, "schedule/index.html", {"schedule_data": schedule_tables})
 
 
+def index2(request):
+    schedule_tables = schedule_table(request)
+    return render(request, "schedule/index2.html", {"schedule_data": schedule_tables})
+
+
 # Select Day for find free time (start hour)
 def index_day(request, day):
     temp = []
@@ -130,48 +135,50 @@ def comment(request):
 # def schedule_table(request, day):
 def schedule_table(request):
     schedule_day = []
-    for data in Day.objects.filter(user=request.user):
-        temp = []
-        thing_temp = []
-        schedule_data = []
-        for x in data.todolist_id.all():
-            temp.append(x.td_start)
-            temp.append(x.td_end)
-            thing_temp.append(x.td_thing)
+    if(request.user.is_authenticated):
+        for data in Day.objects.filter(user=request.user):
+            temp = []
+            thing_temp = []
+            schedule_data = []
+            for x in data.todolist_id.all():
+                temp.append(x.td_start)
+                temp.append(x.td_end)
+                thing_temp.append(x.td_thing)
 
-        if len(temp) != 0:
-            # clean data schedule_data
+            if len(temp) != 0:
+                # clean data schedule_data
+                i = 0
+                j = 0
+
+                while i < len(temp):
+                    schedule_data.append([((temp[i].hour * 60) + temp[i].minute),
+                                          ((temp[i+1].hour * 60) +
+                                           temp[i+1].minute),
+                                          thing_temp[j]])
+                    i += 2
+                    j += 1
+                schedule_data.sort()
+            else:
+                schedule_data = [[0, 1439, "Void"]]
+
+            free_time = []
             i = 0
-            j = 0
+            if (schedule_data[0][0] != 0):
+                free_time.append([0, schedule_data[0][0]-1, "Void"])
+            if (schedule_data[-1][1] != 1439):
+                free_time.append([schedule_data[-1][1]+1, 1439, "Void"])
+            while i < len(schedule_data)-1:
+                free_time.append(
+                    [schedule_data[i][1]+1, schedule_data[i+1][0]-1, "Void"])
+                i += 1
+            free_time.sort()
 
-            while i < len(temp):
-                schedule_data.append([((temp[i].hour * 60) + temp[i].minute),
-                                      ((temp[i+1].hour * 60) +
-                                       temp[i+1].minute),
-                                      thing_temp[j]])
-                i += 2
-                j += 1
-            schedule_data.sort()
-        else:
-            schedule_data = [[0, 1439, "Void"]]
-
-        free_time = []
-        i = 0
-        if (schedule_data[0][0] != 0):
-            free_time.append([0, schedule_data[0][0]-1, "Void"])
-        if (schedule_data[-1][1] != 1439):
-            free_time.append([schedule_data[-1][1]+1, 1439, "Void"])
-        while i < len(schedule_data)-1:
-            free_time.append(
-                [schedule_data[i][1]+1, schedule_data[i+1][0]-1, "Void"])
-            i += 1
-        free_time.sort()
-
-        comeplete_schedule = schedule_data + free_time
-        comeplete_schedule.sort()
-        schedule_day.append([comeplete_schedule, data.day_code])
-
-    return schedule_day
+            comeplete_schedule = schedule_data + free_time
+            comeplete_schedule.sort()
+            schedule_day.append([comeplete_schedule, data.day_code])
+        return schedule_day
+    else:
+        return []
 
 
 # Default Assign Data
@@ -614,10 +621,14 @@ def index_day_todolist(request, day):
                     can_insert_todolist.append([x.td_id, x.td_thing])
 
     can_insert_todolist.sort()
-    #can_insert_todolists = list(OrderedDict.fromkeys(can_insert_todolist))
+    # can_insert_todolists = list(OrderedDict.fromkeys(can_insert_todolist))
 
     return render(request, "schedule/index.html", {
         "can_insert_todolists": can_insert_todolist,
         "day_insert_todolist": day,
         "schedule_data": schedule_data,
     })
+
+
+def test(request):
+    return render(request, "schedule/test.html")

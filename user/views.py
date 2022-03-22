@@ -20,7 +20,7 @@ def login(request):
 def login_check(request):
     # Check user is already login
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("schedule:index"))
+        return render(request, "schedule/index.html")
     # Check this view use when submit login or not if not return to index
     if request.method == "POST":
         # login process

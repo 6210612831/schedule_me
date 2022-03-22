@@ -1,0 +1,394 @@
+{% load static %}
+
+<!DOCTYPE html>
+<title>หน้าหลัก &#128204;</title>
+
+<html>
+
+<script language="javascript">
+    function check()
+    {
+        var answer = window.confirm("Log out?");
+        return true;
+    }
+</script>   
+
+<script language="javascript">
+
+    function selectDay()
+    {
+        const day = document.getElementById("day").value;
+        var link ="http://127.0.0.1:8000/index_day/"+day
+        window.open(link,"_self");
+        return true;
+    }
+    
+    function selectDayTodolist()
+    {
+        const day = document.getElementById("day_todolist").value;
+        var link ="http://127.0.0.1:8000/index_day_todolist/"+day
+        window.open(link,"_self");
+        return true;
+    }
+
+    function startHR()
+    {
+        const day = document.getElementById("day").value;
+        const start_hr = document.getElementById("start_hr").value;
+        var link ="http://127.0.0.1:8000/index_start_hr/"+day+"/"+start_hr
+        window.open(link,"_self");
+        return true;
+    }
+
+    function startMin()
+    {
+        const day = document.getElementById("day").value;
+        const start_min = document.getElementById("start_min").value;
+        const start_hr = document.getElementById("start_hr").value;
+        var link ="http://127.0.0.1:8000/index_start_min/"+day+"/"+start_hr+"/"+start_min
+        window.open(link,"_self");
+        return true;
+    }
+
+    function endHR()
+    {
+        const day = document.getElementById("day").value;
+        const start_min = document.getElementById("start_min").value;
+        const start_hr = document.getElementById("start_hr").value;
+        const end_hr = document.getElementById("end_hr").value;
+        var link ="http://127.0.0.1:8000/index_end_hr/"+day+"/"+start_hr+"/"+start_min+"/"+end_hr
+        window.open(link,"_self");
+        return true;
+    }
+
+    function selectDayDelete()
+    {
+        const day_delete = document.getElementById("day_delete").value;
+        var link ="http://127.0.0.1:8000/search_day_todolist/"+day_delete
+        window.open(link,"_self");
+        return true;
+    }
+    
+</script>
+
+
+
+{% block body %}
+    <section name="Menu">
+        <h3>User: {{request.user.username}}</h3>
+        <a href="{% url 'schedule:index' %}"><button type="button"  style="width: 5.8em; height: 2.5em;">Index</button></a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'user:logout' %}"><button type="button"  style="width: 5.8em; height: 2.5em;">Log out</button></a>
+        {% else %}
+        <a href="{% url 'user:register' %}"><button type="button"  style="width: 5.8em; height: 2.5em;">Register</button></a>
+        <a href="{% url 'user:login' %}"><button type="button"  style="width: 5.8em; height: 2.5em;">Log in</button></a>
+        {% endif %}
+    </section>
+
+
+    <hr>
+    <h1>Insert Todolist</h1>
+        <section name="Insert Todolist">
+            <table style="width: 1000px; border: 0px ">
+                <tr>
+                    <td>
+                        <form method="POST" action="{% url 'schedule:insert_schdule' %}" class="contact-form" name="form_insert">
+                            {% csrf_token %}
+                            
+                            <h2>--Insert New Todolist--</h2>
+                            <section name="day">
+                                <label>Select Day</label>
+                                <select id="day" name="day" onchange="return selectDay()" >
+                                    {% if day == "mo"%}
+                                    <option value="mo">Monday</option>
+                                    {% elif day == "tu" %}
+                                    <option value="tu">Tuesday</option>
+                                    {% elif day == "we" %}
+                                    <option value="we">Wednesday</option>
+                                    {% elif day == "th" %}
+                                    <option value="th">Thursday</option>
+                                    {% elif day == "fr" %}
+                                    <option value="fr">Friday</option>
+                                    {% elif day == "sa" %}
+                                    <option value="sa">Saturday</option>
+                                    {% elif day == "su" %}
+                                    <option value="su">Sunday</option>
+                                    {% endif %}
+                                    <option value="">---------------</option>
+                                    <option value="mo">Monday</option>
+                                    <option value="tu">Tuesday</option>
+                                    <option value="we">Wednesday</option>
+                                    <option value="th">Thursday</option>
+                                    <option value="fr">Friday</option>
+                                    <option value="sa">Saturday</option>
+                                    <option value="su">Sunday</option>
+                                </select>
+                            </section>
+            
+            
+                            <br>
+                            <section name="select_time">
+                                <label>Start Hour</label>
+            
+                                <!-- Start Hour -->
+                                {% if start_hr %}
+                                <select id="start_hr" name="start_hr" onchange="return startHR()">
+                                    <option value="{{start_hr}}">{{start_hr}}</option>
+                                    <option value="">**</option>
+                                    {% for x in free_hr_start %}
+                                    <option value="{{x}}">{{x}}</option>
+                                    {% endfor %}
+                                </select>
+                                {% else %}
+                                <select id="start_hr" name="start_hr" onchange="return startHR()">
+                                    <option value="">**</option>
+                                    {% for x in free_hr_start %}
+                                    <option value="{{x}}">{{x}}</option>
+                                    {% endfor %}
+                                </select>
+                                {% endif %}
+            
+            
+                                <!-- Start Minute -->
+                                <label>Start Minute</label>
+                                {% if start_min %}
+                                <select id="start_min" name="start_min" onchange="return startMin()">
+                                    <option value="{{start_min}}">{{start_min}}</option>
+                                    <option value="">**</option>
+                                    {% for x in free_min_start %}
+                                    <option value="{{x}}">{{x}}</option>
+                                    {% endfor %}
+                                </select>
+                                {% else %}
+                                <select id="start_min" name="start_min" onchange="return startMin()">
+                                    <option value="">**</option>
+                                    {% for x in free_min_start %}
+                                    <option value="{{x}}">{{x}}</option>
+                                    {% endfor %}
+                                </select>
+                                {% endif %}
+            
+                                --|--
+                                <!-- End Hour -->
+                                <label>End Hour</label>
+                                {% if end_hr %}
+                                <select id="end_hr" name="end_hr" onchange="return endHR()">
+                                    <option value="{{end_hr}}">{{end_hr}}</option>
+                                    <option value="">**</option>
+                                    {% for x in free_hr_end %}
+                                    <option value="{{x}}">{{x}}</option>
+                                    {% endfor %}
+                                </select>
+                                {% else %}
+                                <select id="end_hr" name="end_hr" onchange="return endHR()">
+                                    <option value="">**</option>
+                                    {% for x in free_hr_end %}
+                                    <option value="{{x}}">{{x}}</option>
+                                    {% endfor %}
+                                </select>
+                                {% endif %}
+            
+            
+                                <!-- End Minute -->
+                                <label>End Minute</label>
+                                <select id="end_min" name="end_min">
+                                    <option value="">**</option>
+                                    {% for x in free_min_end %}
+                                    <option value="{{x}}">{{x}}</option>
+                                    {% endfor %}
+                                </select>
+                            </section>
+            
+            
+                            <br>
+                            <section name="task">
+                                <label>Select Task</label>
+                                <select id="task_id" name="task_id">
+                                    {% for x in task%}
+                                    <option value="{{x.task_id}}">{{x.task_name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </section>
+            
+            
+                            <br>
+                            <section name="note_thing">
+                                <input type="text" name="td_thing" maxlength="50">
+                            </section>
+            
+            
+                            <br>
+                            <!-- Submit -->
+                            <input type="submit">
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'schedule:insert_todolist_schdule' %}" class="contact-form" name="form_insert_todolist_schdule">
+                            {% csrf_token %}
+                            <section name="day">
+                                <h2>--Insert Exist Todolist--</h2>
+                                <label>Select Day</label>
+                                <select id="day_todolist" name="day_todolist" onchange="return selectDayTodolist()" >
+                                    {% if day_insert_todolist == "mo"%}
+                                    <option value="mo">Monday</option>
+                                    {% elif day_insert_todolist == "tu" %}
+                                    <option value="tu">Tuesday</option>
+                                    {% elif day_insert_todolist == "we" %}
+                                    <option value="we">Wednesday</option>
+                                    {% elif day_insert_todolist == "th" %}
+                                    <option value="th">Thursday</option>
+                                    {% elif day_insert_todolist == "fr" %}
+                                    <option value="fr">Friday</option>
+                                    {% elif day_insert_todolist == "sa" %}
+                                    <option value="sa">Saturday</option>
+                                    {% elif day_insert_todolist == "su" %}
+                                    <option value="su">Sunday</option>
+                                    {% endif %}
+                                    <option value="">---------------</option>
+                                    <option value="mo">Monday</option>
+                                    <option value="tu">Tuesday</option>
+                                    <option value="we">Wednesday</option>
+                                    <option value="th">Thursday</option>
+                                    <option value="fr">Friday</option>
+                                    <option value="sa">Saturday</option>
+                                    <option value="su">Sunday</option>
+                                </select>
+
+                                <br>
+                                <br>
+                                <label>Select Todolist</label>
+                                <select id="todolist" name="todolist">
+                                    <option value="">---------------</option>
+                                    {% for x in can_insert_todolists%}
+                                    <option value="{{x.0}}">{{x.1}}</option>
+                                    {% endfor%}
+                                </select>
+                                <br>
+                                <br>
+                                <!-- Submit -->
+                                <input type="submit">
+                                <br>
+                                <br>
+                                <br>
+                                <br>
+                                <br>
+                            
+                            </section>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+
+
+            
+        </section>
+
+
+    <hr>
+    <h1>Delete Day Todolist</h1>
+        <section name="Search Day Todolist">
+            <label>Select Day</label>
+            <select id="day_delete" name="day_delete" onchange="return selectDayDelete()">
+                {% if day_delete == "mo"%}
+                <option value="mo">Monday</option>
+                {% elif day_delete == "tu" %}
+                <option value="tu">Tuesday</option>
+                {% elif day_delete == "we" %}
+                <option value="we">Wednesday</option>
+                {% elif day_delete == "th" %}
+                <option value="th">Thursday</option>
+                {% elif day_delete == "fr" %}
+                <option value="fr">Friday</option>
+                {% elif day_delete == "sa" %}
+                <option value="sa">Saturday</option>
+                {% elif day_delete == "su" %}
+                <option value="su">Sunday</option>
+                {% endif %}
+                <option value="">---------------</option>
+                <option value="mo">Monday</option>
+                <option value="tu">Tuesday</option>
+                <option value="we">Wednesday</option>
+                <option value="th">Thursday</option>
+                <option value="fr">Friday</option>
+                <option value="sa">Saturday</option>
+                <option value="su">Sunday</option>
+            </select>
+        </section>
+        <section name="Delete Day Todolist button">
+            {% for x in todolist_for_delete%}
+                {{x}}<a href="{% url 'schedule:delete_day_todolist' day_delete x.td_id %}">Delete</a>
+                <br>
+            {% endfor %}
+        </section>
+
+
+    <hr>
+    <h1>Delete Todolist</h1>  
+        <section name="Delete Todolist">
+        <a href="{% url 'schedule:search_todolist' %}"><button type="button"  style="width: 5.8em; height: 2.5em;">Search Todolist</button></a>
+        <br>
+        <br>
+            {% for x in todolist %}
+                {{x}}<a href="{% url 'schedule:delete_todolist' x.td_id %}">Delete</a>
+                <br>
+            {% endfor %}
+        </section>
+<!-- 
+{{schedule_data}}
+{{schedule_data|length}}
+<h3>Schedule Table</h3>
+    <table style="width: 1000px;">
+        <tr>
+        <td>
+            <table style="width:100%; text-align: center;">
+                <tr>
+                    {% for x in schedule_data %}
+                        <td>
+                        {{x.2}}
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </td>
+        </tr>
+        
+    </table> 
+-->
+    
+
+    <hr>
+    <h1>Schedule_Day</h1>
+    <section name="Schedule_Day">
+        
+
+        <!-- {{schedule_day}} -->
+        <table style="width: 1000px; border: 0px ">
+            <tr style="text-align: center;">
+                <th>Day</th>
+                <th>Schedule</th>
+            </tr>
+            {% for x in schedule_data %}
+            <tr >
+                <td style="text-align: center;">
+                    {{x.1}}
+                </td>
+                <td>
+                    <table style="width:100%; text-align: center; border-collapse: collapse;">
+                        <tr>
+                            {% for y in x.0 %}
+                                <td style="border: 1px solid black;  border-collapse: collapse;">
+                                {{y.2}}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </section>
+
+
+
+{% endblock %}
+</html>
