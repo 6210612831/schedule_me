@@ -143,6 +143,7 @@ def schedule_table(request):
             for x in data.todolist_id.all():
                 temp.append(x.td_start)
                 temp.append(x.td_end)
+                temp.append(x.td_id)
                 thing_temp.append(x.td_thing)
 
             if len(temp) != 0:
@@ -154,22 +155,22 @@ def schedule_table(request):
                     schedule_data.append([((temp[i].hour * 60) + temp[i].minute),
                                           ((temp[i+1].hour * 60) +
                                            temp[i+1].minute),
-                                          thing_temp[j]])
-                    i += 2
+                                          thing_temp[j], temp[i+2]])
+                    i += 3
                     j += 1
                 schedule_data.sort()
             else:
-                schedule_data = [[0, 1439, "Void"]]
+                schedule_data = [[0, 1439, "-", -1]]
 
             free_time = []
             i = 0
             if (schedule_data[0][0] != 0):
-                free_time.append([0, schedule_data[0][0]-1, "Void"])
+                free_time.append([0, schedule_data[0][0]-1, "-", -1])
             if (schedule_data[-1][1] != 1439):
-                free_time.append([schedule_data[-1][1]+1, 1439, "Void"])
+                free_time.append([schedule_data[-1][1]+1, 1439, "-", -1])
             while i < len(schedule_data)-1:
                 free_time.append(
-                    [schedule_data[i][1]+1, schedule_data[i+1][0]-1, "Void"])
+                    [schedule_data[i][1]+1, schedule_data[i+1][0]-1, "-", -1])
                 i += 1
             free_time.sort()
 
@@ -526,15 +527,23 @@ def delete_day_todolist(request, day_delete, td_id):
 # Search Todolist for Delete
 def search_todolist(request):
     todolist = []
+    search_check = 1
 
-    for x in Todolist.objects.filter(user=request.user).all():
-        todolist.append(x)
+    if request.method == "POST":
+        search = request.POST["search"]
+        for x in Todolist.objects.filter(user=request.user).all():
+            if x.search(search):
+                todolist.append(x)
+    else:
+        for x in Todolist.objects.filter(user=request.user).all():
+            todolist.append(x)
 
     # Get schedule table data
     schedule_data = schedule_table(request)
 
     return render(request, "schedule/index.html", {
         "todolist": todolist,
+        "search_check": search_check,
         "schedule_data": schedule_data,
     })
 
@@ -547,32 +556,31 @@ def delete_todolist(request, td_id):
 
 # INSERT TODOLIST
 def insert_todolist_schdule(request):
-    pass
-    # if not request.user.is_authenticated:
-    #     messages.warning(request, "Login First to proceed")
-    #     return HttpResponseRedirect(reverse("schedule:index"))
+    if not request.user.is_authenticated:
+        messages.warning(request, "Login First to proceed")
+        return HttpResponseRedirect(reverse("schedule:index"))
 
-    # if request.method == "POST":
-    #     day = request.POST["day"]
-    #     td_thing = request.POST["td_thing"]
-    #     start_hr = request.POST["start_hr"]
-    #     start_min = request.POST["start_min"]
-    #     end_hr = request.POST["end_hr"]
-    #     end_min = request.POST["end_min"]
-    #     task_id = request.POST["task_id"]
+    if request.method == "POST":
+        day = request.POST["day"]
+        td_thing = request.POST["td_thing"]
+        start_hr = request.POST["start_hr"]
+        start_min = request.POST["start_min"]
+        end_hr = request.POST["end_hr"]
+        end_min = request.POST["end_min"]
+        task_id = request.POST["task_id"]
 
-    #     start_time = start_hr+":"+start_min
-    #     end_time = end_hr + ":" + end_min
-    #     task = Task.objects.get(task_id=task_id)
-    #     new_todolist = Todolist.objects.create(td_thing=td_thing, td_start=start_time, td_end=end_time,
-    #                                            task=task, user=request.user)
-    #     new_todolist.save()
-    #     new_day = Day.objects.get(day_code=day, user=request.user)
-    #     new_day.todolist_id.add(new_todolist)
-    #     new_day.save()
-    #     return HttpResponseRedirect(reverse("schedule:index"))
-    # else:
-    #     return HttpResponseRedirect(reverse("schedule:index"))
+        start_time = start_hr+":"+start_min
+        end_time = end_hr + ":" + end_min
+        task = Task.objects.get(task_id=task_id)
+        new_todolist = Todolist.objects.create(td_thing=td_thing, td_start=start_time, td_end=end_time,
+                                               task=task, user=request.user)
+        new_todolist.save()
+        new_day = Day.objects.get(day_code=day, user=request.user)
+        new_day.todolist_id.add(new_todolist)
+        new_day.save()
+        return HttpResponseRedirect(reverse("schedule:index"))
+    else:
+        return HttpResponseRedirect(reverse("schedule:index"))
 
 
 def index_day_todolist(request, day):
@@ -630,5 +638,19 @@ def index_day_todolist(request, day):
     })
 
 
-def test(request):
-    return render(request, "schedule/test.html")
+# INSERT EXIST TODOLIST
+def insert_exist_todolist_schdule(request):
+    if not request.user.is_authenticated:
+        messages.warning(request, "Login First to proceed")
+        return HttpResponseRedirect(reverse("schedule:index"))
+
+    if request.method == "POST":
+        day = request.POST["day_todolist"]
+        td_id = request.POST["todolist"]
+        todolist = Todolist.objects.get(td_id=td_id)
+        new_day = Day.objects.get(day_code=day, user=request.user)
+        new_day.todolist_id.add(todolist)
+        new_day.save()
+        return HttpResponseRedirect(reverse("schedule:index"))
+    else:
+        return HttpResponseRedirect(reverse("schedule:index"))

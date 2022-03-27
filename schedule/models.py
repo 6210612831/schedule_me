@@ -25,6 +25,11 @@ class Todolist(models.Model):
     def __str__(self):
         return f"td_id: {self.td_id} --|-- td_thing:{self.td_thing} --|-- td_start:{self.td_start} --|-- td_end:{self.td_end} --|-- user:{self.user}"
 
+    def search(self, search):
+        if search.lower() in self.td_thing.lower():
+            return True
+        return False
+
 
 class Day(models.Model):
     id = models.AutoField(primary_key=True)

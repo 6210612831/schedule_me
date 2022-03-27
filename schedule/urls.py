@@ -25,9 +25,10 @@ urlpatterns = [
          views.delete_todolist, name="delete_todolist"),
     path("insert_todolist_schdule", views.insert_todolist_schdule,
          name="insert_todolist_schdule"),
+    path("insert_exist_todolist_schdule", views.insert_exist_todolist_schdule,
+         name="insert_exist_todolist_schdule"),
     path("index_day_todolist/<str:day>",
          views.index_day_todolist, name="index_day_todolist"),
 
-    path("test", views.test, name="test"),
 
 ]

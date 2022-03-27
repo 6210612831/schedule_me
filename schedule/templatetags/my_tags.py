@@ -19,3 +19,26 @@ def divide(value, arg):
         return str(outputs).zfill(2)
     except (ValueError, ZeroDivisionError):
         return None
+
+
+@register.filter
+def convertdays(day):
+    try:
+        output = ""
+        if day == "mo":
+            output = "Monday"
+        elif day == "tu":
+            output = "Tuesday"
+        elif day == "we":
+            output = "Wednesday"
+        elif day == "th":
+            output = "Thursday"
+        elif day == "fr":
+            output = "Friday"
+        elif day == "sa":
+            output = "Saturday"
+        elif day == "su":
+            output = "Sunday"
+        return output
+    except (ValueError, ZeroDivisionError):
+        return None

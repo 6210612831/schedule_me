@@ -21,14 +21,26 @@
       var answer = window.confirm("Log out?");
       return true;
   }
+  function confirm_delete(name)
+  {
+      var answer = window.confirm("Confirm to delete '" + name + "'");
+      return answer;
+  }
   function if_select_day()
   { 
-    if(document.getElementById("selected_day").value){
+    if(document.getElementById("selected_day").value || document.getElementById("day_insert_todolist").value){
       
       window.setTimeout(function () { 
         document.getElementById("Insert_Schedule").focus();
         }, 0); 
     }
+    if(document.getElementById("search_todolist").value ){
+      
+      window.setTimeout(function () { 
+        document.getElementById("Delete_todolist").focus();
+        }, 0); 
+    }
+    
   }
   window.onload = if_select_day;
 </script>   
@@ -145,12 +157,15 @@
 </div>
 
 <body>
+
+{% if request.user.is_authenticated %}
 <!-- Page content -->
 <div class="w3-content" style="max-width:2000px;margin-top:46px">
 
   <!-- Schedule Day Section -->
   <div class="w3-container w3-content w3-center w3-padding-64"  id="Schedule_Day">
     <h2 class="w3-wide">Schedule Day</h2>
+    <p class="w3-opacity w3-center"><i>you can remove todolist by click todolist in this schedule table</i></p><br>
     <div class="w3-row w3-padding-32">
         <section name="Schedule_Day">
           <!-- {{schedule_day}} -->
@@ -162,7 +177,7 @@
               {% for x in schedule_data %}
               <tr >
                   <td style="text-align: center;">
-                      {{x.1}}
+                      {{x.1|convertdays}}
                   </td>
                   <td>
                       <table style="width:100%; text-align: center; border-collapse: collapse;">
@@ -170,7 +185,11 @@
                               {% for y in x.0 %}
                                   <td style="border: 1px solid black;  border-collapse: collapse;">
                                   <!-- {{y.2}} : ( {%widthratio y.0 60 1%} - {%widthratio y.1 60 1%} ) -->
-                                  {{y.2}} 
+                                  {% if y.3 != -1%}
+                                  <a href="{% url 'schedule:delete_day_todolist' x.1 y.3 %}" onclick="return confirm_delete('{{y.2}}')" STYLE="background-color: rgb(196, 255, 245)">{{y.2}} </a>
+                                  {% else %}
+                                  {{y.2}}
+                                  {% endif%}
                                   <br>
                                   ( {{ y.0|divide:60 }}:{{ y.0|modulo:60 }} - {{ y.1|divide:60 }}:{{ y.1|modulo:60 }} )
                                   </td>
@@ -186,6 +205,7 @@
   </div>
 
   <input type="hidden" id="selected_day" value="{{day}}">
+  <input type="hidden" id="day_insert_todolist" value="{{day_insert_todolist}}">
   <!-- Insert Schedule Section -->
   <div class="w3-black" tabindex="0" id="Insert_Schedule">
     <div class="w3-container w3-content w3-padding-64" style="max-width:800px">
@@ -326,7 +346,7 @@
         </div>
         <div class="w3-margin-bottom">
           <div class="w3-container w3-white">
-            <form method="post" action="{% url 'schedule:insert_todolist_schdule' %}" class="contact-form" name="form_insert_todolist_schdule">
+            <form method="post" action="{% url 'schedule:insert_exist_todolist_schdule' %}" class="contact-form" name="form_insert_todolist_schdule">
               {% csrf_token %}
               <section name="day">
                   <h2>Insert Exist Todolist</h2>
@@ -385,59 +405,100 @@
     </div>
   </div>
 
-  <!-- Ticket Modal -->
-  <div id="ticketModal" class="w3-modal">
-    <div class="w3-modal-content w3-animate-top w3-card-4">
-      <header class="w3-container w3-teal w3-center w3-padding-32"> 
-        <span onclick="document.getElementById('ticketModal').style.display='none'" 
-       class="w3-button w3-teal w3-xlarge w3-display-topright">×</span>
-        <h2 class="w3-wide"><i class="fa fa-suitcase w3-margin-right"></i>Tickets</h2>
-      </header>
-      <div class="w3-container">
-        <p><label><i class="fa fa-shopping-cart"></i> Tickets, $15 per person</label></p>
-        <input class="w3-input w3-border" type="text" placeholder="How many?">
-        <p><label><i class="fa fa-user"></i> Send To</label></p>
-        <input class="w3-input w3-border" type="text" placeholder="Enter email">
-        <button class="w3-button w3-block w3-teal w3-padding-16 w3-section w3-right">PAY <i class="fa fa-check"></i></button>
-        <button class="w3-button w3-red w3-section" onclick="document.getElementById('ticketModal').style.display='none'">Close <i class="fa fa-remove"></i></button>
-        <p class="w3-right">Need <a href="#" class="w3-text-blue">help?</a></p>
-      </div>
-    </div>
-  </div>
 
-  <!-- The Contact Section -->
-  <div class="w3-container w3-content w3-padding-64" style="max-width:800px" id="contact">
-    <h2 class="w3-wide w3-center">CONTACT</h2>
-    <p class="w3-opacity w3-center"><i>Fan? Drop a note!</i></p>
-    <div class="w3-row w3-padding-32">
-      <div class="w3-col m6 w3-large w3-margin-bottom">
-        <i class="fa fa-map-marker" style="width:30px"></i> Chicago, US<br>
-        <i class="fa fa-phone" style="width:30px"></i> Phone: +00 151515<br>
-        <i class="fa fa-envelope" style="width:30px"> </i> Email: mail@mail.com<br>
-      </div>
-      <div class="w3-col m6">
-        <form action="/action_page.php" target="_blank">
-          <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
-            <div class="w3-half">
-              <input class="w3-input w3-border" type="text" placeholder="Name" required name="Name">
-            </div>
-            <div class="w3-half">
-              <input class="w3-input w3-border" type="text" placeholder="Email" required name="Email">
-            </div>
-          </div>
-          <input class="w3-input w3-border" type="text" placeholder="Message" required name="Message">
-          <button class="w3-button w3-black w3-section w3-right" type="submit">SEND</button>
+  <input type="hidden" id="search_todolist" value="{{search_check}}">
+  <!-- The Delete todolist Section -->
+  <div class="w3-container w3-content w3-padding-64" style="max-width:800px" tabindex="0" id="Delete_todolist">
+    <h2 class="w3-wide w3-center">Delete todolist</h2>
+    <p class="w3-opacity w3-center"><i>You can search todolist then delete it!</i></p>
+      <div class="w3-col w3-center">
+        <form action="{% url 'schedule:search_todolist' %}" method="post">
+          {% csrf_token %}
+          <input class="w3-input" type="text" placeholder="Search" name="search">
+          <button class="w3-button w3-black w3-section w3-right" type="submit">Search</button>
+          <a href="{% url 'schedule:search_todolist' %}"><button class="w3-button w3-black w3-section w3-left">All list</button></a>
         </form>
       </div>
-    </div>
+    {% if todolist%}
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <ul class="w3-ul">
+        {% for x in todolist%}
+        <a href="#{{x.td_id}}" onclick="document.getElementById('to_do_detail#{{x.td_id}}').style.display='block'"><li class="w3-padding w3-black" id="{{x.td_id}}">{{x.td_thing}}<span class="w3-tag w3-red w3-right w3-margin-right">ID : {{x.td_id}}</span></li></a>
+        <hr>
+        <!-- Todolist Detail -->
+          <div id="to_do_detail#{{x.td_id}}" class="w3-modal">
+            <div class="w3-modal-content w3-animate-top w3-card-4">
+              <header class="w3-container w3-teal w3-center w3-padding-32"> 
+                <span onclick="document.getElementById('to_do_detail#{{x.td_id}}').style.display='none'" 
+              class="w3-button w3-teal w3-xlarge w3-display-topright">×</span>
+                <h2 class="w3-wide"><i class="fa fa-search w3-margin-right"></i>To Do Details  : {{x.td_id}}</h2>
+              </header>
+              <div class="w3-container">
+                <p><label ><i class="fa fa-shopping-cart"></i> To Do Thing</label></p>
+                <input class="w3-input w3-border" type="text" placeholder="{{x.td_thing}}" readonly>
+                <p><label><i class="fa fa-user"></i> To Do Start</label></p>
+                <input class="w3-input w3-border" type="text" placeholder="{{x.td_start}}" readonly>
+                <p><label><i class="fa fa-user"></i> To Do End</label></p>
+                <input class="w3-input w3-border" type="text" placeholder="{{x.td_end}}" readonly>
+                <p><label><i class="fa fa-user"></i> To Do Task</label></p>
+                <input class="w3-input w3-border" type="text" placeholder="{{x.task}}" readonly>
+                <a href="{% url 'schedule:delete_todolist' x.td_id %}" onclick="return confirm_delete('{{x.td_thing}}')">
+                  <button class="w3-button w3-block w3-padding-16 w3-section w3-right w3-black">Delete <i class="fa fa-check"></i></button>
+                </a>
+                
+                <button class="w3-button w3-red w3-section" onclick="document.getElementById('to_do_detail#{{x.td_id}}').style.display='none'">Close <i class="fa fa-remove"></i></button>
+                
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </ul>
+    {% endif%}
   </div>
+
+
+
   
 <!-- End Page Content -->
 </div>
-
-<!-- Image of location/map -->
-<img src="/w3images/map.jpg" class="w3-image w3-greyscale-min" style="width:100%">
-
+{% else %}
+  <!-- The Log in Section -->
+  <div class="w3-container w3-content w3-padding-64" style="max-width:800px" id="contact">
+    <h2 class="w3-wide w3-center">Schedule Me</h2>
+    <p class="w3-opacity w3-center"><i>Log in then let schedule your time!</i></p>
+    <div class="w3-bar-block w3-card-4">
+      <br>
+      <a href="{% url 'user:register' %}" class="w3-bar-item w3-button">Register</a>
+      <hr>
+      <p class="w3-bar-item w3-button">Login</p>
+      <form action="{% url 'user:login_check' %}" method="post" id=login>
+          {% csrf_token %}
+          <div class="w3-row-padding">
+            <div class="w3-half">
+              <input class="w3-input w3-border" type="text" placeholder="Username" required name="username">
+            </div>
+            <div class="w3-half">
+              <input class="w3-input w3-border" type="password" placeholder="Password" required name="password">
+            </div>
+          </div>
+          <p class="w3-button w3-white w3-section w3-right"></p>
+          <button class="w3-button w3-black w3-section w3-right" type="reset">Reset</button>
+          <p class="w3-button w3-white w3-section w3-right"></p>
+          <button class="w3-button w3-black w3-section w3-right" type="submit">Login</button>
+      </form>
+      <br>
+      <br>
+      <br>
+      <br>
+  </div>      
+  </div>
+{% endif%}
 <!-- Footer -->
 <footer class="w3-container w3-padding-64 w3-center w3-opacity w3-light-grey w3-xlarge">
   <i class="fa fa-facebook-official w3-hover-opacity"></i>
