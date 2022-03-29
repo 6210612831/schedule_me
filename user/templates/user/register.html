@@ -3,80 +3,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <title>Sign up</title>
+<head>
+    <title>Schedule Me</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {font-family: "Lato", sans-serif}
+        .mySlides {display: none}
+    </style>
+</head>
 
-
-{% block body %}
+<!-- Navbar -->
+<div class="w3-top">
+    <div class="w3-bar w3-black w3-card">
+      <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+      <a href="{% url 'schedule:index' %}" class="w3-bar-item w3-button w3-padding-large">HOME</a>
+      <div class="w3-dropdown-hover w3-hide-small">
+          
+          {% if request.user.is_authenticated %}
+          <button class="w3-padding-large w3-button" title="More">TODOLIST<i class="fa fa-caret-down"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4">
+                  <a href="#Insert_Schedule" class="w3-bar-item w3-button">Create</a>
+                  <a href="#" class="w3-bar-item w3-button">Delete</a>
+              </div>
+          {%  else %}
+          <button class="w3-padding-large w3-button" title="More">TODOLIST</button>
+          {% endif %}
+      </div>
+      <div class="w3-dropdown-hover w3-hide-small">
+      {% if request.user.is_authenticated %}
+          <button class="w3-padding-large w3-button" >Account: {{request.user.username}}<i class="fa fa-caret-down"></i></button>   
+          <div class="w3-dropdown-content w3-bar-block w3-card-4">
+              <a href="{% url 'user:logout' %}" class="w3-bar-item w3-button">Logout</a>
+          </div>  
+      {% else %}
+          <button class="w3-padding-large w3-button" title="More">ACCOUNT<i class="fa fa-caret-down"></i></button>
+          <div class="w3-dropdown-content w3-bar-block w3-card-4" >
+              <br>
+              <a href="{% url 'user:register' %}" class="w3-bar-item w3-button">Register</a>
+              <hr>
+              <p class="w3-bar-item w3-button">Login</p>
+              <form action="{% url 'user:login_check' %}" method="post" id=login>
+                  {% csrf_token %}
+                  <div class="w3-row-padding">
+                    <div class="w3-half">
+                      <input class="w3-input w3-border" type="text" placeholder="Username" required name="username">
+                    </div>
+                    <div class="w3-half">
+                      <input class="w3-input w3-border" type="password" placeholder="Password" required name="password">
+                    </div>
+                  </div>
+                  <p class="w3-button w3-white w3-section w3-right"></p>
+                  <button class="w3-button w3-black w3-section w3-right" type="reset">Reset</button>
+                  <p class="w3-button w3-white w3-section w3-right"></p>
+                  <button class="w3-button w3-black w3-section w3-right" type="submit">Login</button>
+              </form>
+          </div>      
+      {% endif %}
         
-      
-        <!-- Register Form -->
-<section>
-    <form method="POST" action="{% url 'user:confirm_register' %}" class="contact-form" name="form_insert">
-        {% csrf_token %}
-            <h6  style="font-size: 35px;"><b>SIGN UP</b></h6>
+      </div>
+      <a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right"><i class="fa fa-search"></i></a>
+    </div>
+  </div>
 
+
+
+
+
+<!-- The Contact Section -->
+<div class="w3-container w3-content w3-padding-64" style="max-width:800px" id="contact">
+    <h2 class="w3-wide w3-center">Register</h2>
+    <p class="w3-opacity w3-center"><i>Register for manage your schedule!</i></p>
+    <div class="w3-row w3-padding-32">
+      <div class="w3-col m6 w3-large w3-margin-bottom">
+        <i class="fa fa-map-marker" style="width:30px"></i>Github: <a href="https://github.com/6210612831">Pattana Sapphanachai</a> <br>
+        <i class="fa fa-phone" style="width:30px"></i> Phone: 0830610124<br>
+        <i class="fa fa-envelope" style="width:30px"> </i> Email: <a href="mailto:pattana.sapphanachai@gmail.com">Primary</a> or <a href="mailto:day25436@hotmail.co.th">Secondary</a> 
         <br>
-        <!-- username-->
-            <h6 class="mb-0 text-sm">Username</h6>
-            <input class="mb-4" type="text" name="username" placeholder="Enter username" required/>
+      </div>
+      <div class="w3-col m6">
+        <form action="{% url 'user:confirm_register' %}" name="form_insert" method="POST">
+            {% csrf_token %}
+            <input class="w3-input w3-border" type="text" name="username" placeholder="Enter username" required>
                 {% if fail_username %}
                 <label class="mb-1" style="color: tomato; margin-top: -1em;">
                     <b>{{fail_username}}</b><br>
                 </label>  
                 {% endif %} 
-        
-        <br>
-        <!-- password-->
-            <h6 class="mb-0 text-sm">Password</h6>
-            <input class="mb-4" type="password" name="password" placeholder="Enter password" required/>
-                {% if fail_password %}
-                <label class="mb-1" style="color: tomato; margin-top: -1em;">
-                    <b>{{fail_password}}</b><br> 
-                </label> 
-                {% endif %}
-
-        <!-- <div style="font-size: 0.8em;">
-            <li>Password must have at least 8 characters</li>
-            <li>Password must have at least 1 of a-z</li>
-            <li>Password must have at least 1 of A-Z</li>
-            <li>Password must have at least 1 of 0-9</li>
-        </div>  -->
-
-        <br>
-        <!-- re password-->
-            <h6 class="mb-0 text-sm">Confirm Password</h6>
-            <input type="password" name="re_password" placeholder="Confirm password" required/>
-                {% if fail_re_password %}
-                <label class="mb-1" style="color: tomato; margin-top: 0em;">
-                    <b>{{fail_re_password}}</b><br>
-                </label>  
-                {% endif %}
-
-        <br>
-        <!-- Name -->
-            <h6 class="mb-0 text-sm">First Name</h6>
-            <input type="text" name="first_name" placeholder="Enter your first name" required/>
-
-
-            <h6 class="mb-0 text-sm">Last Name</h6>
-            <input type="text" name="last_name" placeholder="Enter your last name" required/>
-        
-        <br>
-        <!-- Email-->
-            <h6 class="mb-0 text-sm">Email Address</h6>
-            <input  type="email" name="email" placeholder="Enter a valid email address" required/>
+            <div class="w3-row-padding" style="margin:8px -16px 8px -16px">
+                <div class="w3-half">
+                <input class="w3-input w3-border" type="password" name="password" placeholder="Enter password" required>
+                    {% if fail_password %}
+                    <label class="mb-1" style="color: tomato; margin-top: -1em;">
+                        <b>{{fail_password}}</b><br> 
+                    </label> 
+                    {% endif %}
+                </div>
+                <div class="w3-half">
+                <input class="w3-input w3-border" name="re_password" placeholder="Enter Confirm password" required>
+                    {% if fail_re_password %}
+                    <label class="mb-1" style="color: tomato; margin-top: 0em;">
+                        <b>{{fail_re_password}}</b><br>
+                    </label>  
+                    {% endif %}
+                </div>
+                <div class="w3-half"  style="margin:8px 0px 0px 0px">
+                    <input class="w3-input w3-border" name="first_name" placeholder="Enter your first name" required>
+                    {% if fail_re_password %}
+                    <label class="mb-1" style="color: tomato; margin-top: 0em;">
+                        <b>{{fail_re_password}}</b><br>
+                    </label>  
+                    {% endif %}
+                </div>
+                <div class="w3-half"  style="margin:8px 0px 0px 0px">
+                    <input class="w3-input w3-border" name="last_name" placeholder="Enter your last name" required>
+                    {% if fail_re_password %}
+                    <label class="mb-1" style="color: tomato; margin-top: 0em;">
+                        <b>{{fail_re_password}}</b><br>
+                    </label>  
+                    {% endif %}
+                </div>
+            </div>
+          <input class="w3-input w3-border" type="email" name="email" placeholder="Enter a valid email address" required>
             {% if fail_email %}
-                <label class="mb-1" style="color: tomato; margin-top: -1em;">
-                    <b>{{fail_email}}</b><br>
-                </label>  
+                    <label class="mb-1" style="color: tomato; margin-top: -1em;">
+                        <b>{{fail_email}}</b><br>
+                    </label>  
             {% endif %} 
-
-        <br><br><br><br>
-        <button type="submit" class="btn btn-blue text-center">Confirm</button>
-        <small class="font-weight-bold">Aleready have an account ? <a href="{% url 'user:login' %}" style="color: #aa98e7;">Login</a></small>
-                       
+          <button class="w3-button w3-black w3-section w3-right" type="submit">Confirm</button>
+          <div class="font-weight-bold" style="margin: 1.6em 0em 1.6em 0em;">Aleready have an account ? <a href="{% url 'schedule:index' %}" style="color: #aa98e7;">Login</a></div>
+        </form>
+      </div>
+    </div>
+  </div>
+        
     </form>
 </section>
 
 
 </html>
-{% endblock %}
+
