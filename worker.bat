@@ -1,0 +1,1 @@
+celery -A schedule_me worker -l info -P eventlet
