@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'schedule',
     'user',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [

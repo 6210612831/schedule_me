@@ -1,8 +1,4 @@
-from time import daylight
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from pandas import notnull
-from zmq import NULL
+from django.shortcuts import render
 from .models import *
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
@@ -11,6 +7,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from collections import OrderedDict
+from datetime import timedelta, datetime
+from django_celery_beat.models import PeriodicTask,IntervalSchedule
+
+
 # Index view
 
 
@@ -488,6 +488,46 @@ def insert_schdule(request):
         new_day = Day.objects.get(day_code=day, user=request.user)
         new_day.todolist_id.add(new_todolist)
         new_day.save()
+
+        day_list = ["mo","tu","we","th","fr","sa","su"]
+        now = datetime.now()
+
+        while True:
+            if day_list[int(now.weekday())] != day:
+                now = now + timedelta(days=1)
+            else:
+                break
+
+        start_datetime = now.replace(hour=int(start_hr), minute=int(start_min)) - timedelta(hours=7)
+        end_datetime = now.replace(hour=int(end_hr), minute=int(end_min)) - timedelta(hours=7)
+
+        name_start = "Start:"+td_thing+" Day: "+day+" Hour: "+start_hr
+        period_obj = PeriodicTask.objects.create(
+            name=name_start,
+            task="schedule.tasks.line_alert",
+            enabled = True,
+            start_time=start_datetime,
+            #one_off=True if (request.data.get('repeat').lower())=="false" else False,
+            one_off=True,
+            interval = IntervalSchedule.objects.first()
+        )
+        period_obj.args = '['+"\""+name_start+"\""+"]"
+        period_obj.save()
+
+
+        name_end = "End:"+td_thing+" Day: "+day+" Hour: "+end_hr
+        period_obj2 = PeriodicTask.objects.create(
+            name=name_end,
+            task="schedule.tasks.line_alert",
+            enabled = True,
+            start_time=end_datetime,
+            #one_off=True if (request.data.get('repeat').lower())=="false" else False,
+            one_off=True,
+            interval = IntervalSchedule.objects.first()
+        )
+        period_obj2.args = '['+"\""+name_end+"\""+"]"
+        period_obj2.save()
+
         return HttpResponseRedirect(reverse("schedule:index"))
     else:
         return HttpResponseRedirect(reverse("schedule:index"))
@@ -517,6 +557,12 @@ def delete_day_todolist(request, day_delete, td_id):
     day = Day.objects.get(user=request.user, day_code=day_delete)
     day.todolist_id.remove(td_item)
     day.save()
+    
+    name_start = "Start:"+td_item.td_thing+" Day: "+day.day_code+" Hour: "+str(td_item.td_start.hour)
+    PeriodicTask.objects.get(name=name_start).delete()
+    name_end = "End:"+td_item.td_thing+" Day: "+day.day_code+" Hour: "+str(td_item.td_end.hour)
+    PeriodicTask.objects.get(name=name_end).delete()
+
 
     # Get schedule table data
     schedule_data = schedule_table(request)
@@ -651,6 +697,48 @@ def insert_exist_todolist_schdule(request):
         new_day = Day.objects.get(day_code=day, user=request.user)
         new_day.todolist_id.add(todolist)
         new_day.save()
+
+        day_list = ["mo","tu","we","th","fr","sa","su"]
+        now = datetime.now()
+
+        while True:
+            if day_list[int(now.weekday())] != day:
+                now = now + timedelta(days=1)
+            else:
+                break
+
+        start_datetime = now.replace(hour=int(todolist.td_start.hour), minute=int(todolist.td_start.minute)) - timedelta(hours=7)
+        end_datetime = now.replace(hour=int(todolist.td_end.hour), minute=int(todolist.td_end.minute)) - timedelta(hours=7)
+
+        name_start = "Start:"+todolist.td_thing+" Day: "+day+" Hour: "+str(todolist.td_start.hour)
+        period_obj = PeriodicTask.objects.create(
+            name=name_start,
+            task="schedule.tasks.line_alert",
+            enabled = True,
+            start_time=start_datetime,
+            #one_off=True if (request.data.get('repeat').lower())=="false" else False,
+            one_off=True,
+            interval = IntervalSchedule.objects.first()
+        )
+        period_obj.args = '['+"\""+name_start+"\""+"]"
+        period_obj.save()
+
+
+        name_end = "End:"+todolist.td_thing+" Day: "+day+" Hour: "+str(todolist.td_end.hour)
+        period_obj2 = PeriodicTask.objects.create(
+            name=name_end,
+            task="schedule.tasks.line_alert",
+            enabled = True,
+            start_time=end_datetime,
+            #one_off=True if (request.data.get('repeat').lower())=="false" else False,
+            one_off=True,
+            interval = IntervalSchedule.objects.first()
+        )
+        period_obj2.args = '['+"\""+name_end+"\""+"]"
+        period_obj2.save()
+
+
+
         return HttpResponseRedirect(reverse("schedule:index"))
     else:
         return HttpResponseRedirect(reverse("schedule:index"))
